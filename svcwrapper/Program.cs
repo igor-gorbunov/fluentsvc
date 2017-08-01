@@ -9,12 +9,8 @@ namespace SvcWrapper
         /// </summary>
         static void Main()
         {
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
-            {
-                new ServiceWrapper()
-            };
-            ServiceBase.Run(ServicesToRun);
+            ServiceWrapper Service = new ServiceWrapper();
+            ServiceBase.Run(Service);
         }
     }
 
