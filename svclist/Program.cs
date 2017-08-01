@@ -4,9 +4,9 @@ using System.Management;
 
 namespace SvcList
 {
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             ServiceController[] Services;
             Services = ServiceController.GetServices();
@@ -24,6 +24,8 @@ namespace SvcList
                 Console.WriteLine("       Start name:      {0}", WmiService["StartName"]);
                 Console.WriteLine("       Description:     {0}", WmiService["Description"]);
             }
+
+            return 0;
         }
     }
 }
