@@ -42,16 +42,17 @@ namespace SvcWrapper
     {
         public WrapperInstaller()
         {
-            SvcInstaller = new ServiceInstaller();
-
-            SvcInstaller.Description = "Nginx HTTP/HTTPS server.";
-            SvcInstaller.DisplayName = "Nginx";
-            SvcInstaller.ServiceName = "ServiceWrapper";
-            SvcInstaller.StartType = ServiceStartMode.Automatic;
-
-            SvcProcessInstaller = new ServiceProcessInstaller();
-            SvcProcessInstaller.Account = ServiceAccount.LocalSystem;
-
+            SvcInstaller = new ServiceInstaller()
+            {
+                Description = "Nginx HTTP/HTTPS server.",
+                DisplayName = "Nginx",
+                ServiceName = "ServiceWrapper",
+                StartType = ServiceStartMode.Automatic
+            };
+            SvcProcessInstaller = new ServiceProcessInstaller()
+            {
+                Account = ServiceAccount.LocalSystem
+            };
             Installers.Add(SvcInstaller);
             Installers.Add(SvcProcessInstaller);
         }
