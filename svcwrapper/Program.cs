@@ -40,7 +40,7 @@ namespace SvcWrapper
     [RunInstaller(true)]
     public partial class WrapperInstaller : Installer
     {
-        public WrapperInstaller()
+        public WrapperInstaller() : base()
         {
             SvcInstaller = new ServiceInstaller()
             {
@@ -55,36 +55,35 @@ namespace SvcWrapper
                 Account = ServiceAccount.LocalSystem
             };
 
+            BeforeInstall += new InstallEventHandler(BeforeInstallEventHandler);
+            BeforeUninstall += new InstallEventHandler(BeforeUninstallEventHandler);
+
             Installers.Add(SvcInstaller);
             Installers.Add(SvcProcessInstaller);
         }
 
-        public override void Install(System.Collections.IDictionary StateSaver)
+        private void BeforeInstallEventHandler(object sender, InstallEventArgs e)
         {
-            if (Context.Parameters.ContainsKey("ServiceName"))
-                SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
+            if (sender is Installer installer)
+            {
+                if (installer.Context.Parameters.ContainsKey("ServiceName"))
+                    SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
 
-            if (Context.Parameters.ContainsKey("DisplayName"))
-                SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
+                if (installer.Context.Parameters.ContainsKey("DisplayName"))
+                    SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
 
-            if (Context.Parameters.ContainsKey("Description"))
-                SvcInstaller.Description = Context.Parameters["Description"];
-
-            base.Install(StateSaver);
+                if (installer.Context.Parameters.ContainsKey("Description"))
+                    SvcInstaller.Description = Context.Parameters["Description"];
+            }
         }
 
-        public override void Uninstall(System.Collections.IDictionary SavedState)
+        private void BeforeUninstallEventHandler(object sender, InstallEventArgs e)
         {
-            if (Context.Parameters.ContainsKey("ServiceName"))
-                SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
-
-            if (Context.Parameters.ContainsKey("DisplayName"))
-                SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
-
-            if (Context.Parameters.ContainsKey("Description"))
-                SvcInstaller.Description = Context.Parameters["Description"];
-
-            base.Uninstall(SavedState);
+            if (sender is Installer installer)
+            {
+                if (installer.Context.Parameters.ContainsKey("ServiceName"))
+                    SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
+            }
         }
 
         private ServiceInstaller SvcInstaller;
