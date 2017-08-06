@@ -44,17 +44,47 @@ namespace SvcWrapper
         {
             SvcInstaller = new ServiceInstaller()
             {
-                Description = "Nginx HTTP/HTTPS server.",
-                DisplayName = "Nginx",
+                Description = "Service wrapping facility for Windows OS programs.",
+                DisplayName = "Service Wrapper",
                 ServiceName = "ServiceWrapper",
                 StartType = ServiceStartMode.Automatic
             };
+
             SvcProcessInstaller = new ServiceProcessInstaller()
             {
                 Account = ServiceAccount.LocalSystem
             };
+
             Installers.Add(SvcInstaller);
             Installers.Add(SvcProcessInstaller);
+        }
+
+        public override void Install(System.Collections.IDictionary StateSaver)
+        {
+            if (Context.Parameters.ContainsKey("ServiceName"))
+                SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
+
+            if (Context.Parameters.ContainsKey("DisplayName"))
+                SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
+
+            if (Context.Parameters.ContainsKey("Description"))
+                SvcInstaller.Description = Context.Parameters["Description"];
+
+            base.Install(StateSaver);
+        }
+
+        public override void Uninstall(System.Collections.IDictionary SavedState)
+        {
+            if (Context.Parameters.ContainsKey("ServiceName"))
+                SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
+
+            if (Context.Parameters.ContainsKey("DisplayName"))
+                SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
+
+            if (Context.Parameters.ContainsKey("Description"))
+                SvcInstaller.Description = Context.Parameters["Description"];
+
+            base.Uninstall(SavedState);
         }
 
         private ServiceInstaller SvcInstaller;
