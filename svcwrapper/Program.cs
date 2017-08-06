@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Configuration.Install;
 using System.Diagnostics;
 using System.ServiceProcess;
+using System.Text;
 
 namespace SvcWrapper
 {
@@ -26,14 +27,30 @@ namespace SvcWrapper
 
         protected override void OnStart(string[] args)
         {
-            _ChildProcess = Process.Start("C:\\Program Files\\nginx\\nginx.exe", "-p \"C:/Program Files/nginx\"");
+            _ProcessStartInfo = new ProcessStartInfo()
+            {
+                FileName = "C:\\Program Files\\nginx\\nginx.exe",
+                Arguments = "-p \"C:/Program Files/nginx\""
+            };
+
+            _ChildProcess = Process.Start(_ProcessStartInfo);
+
+            _ProcessStopInfo = new ProcessStartInfo()
+            {
+                FileName = "C:\\Program Files\\nginx\\nginx.exe",
+                Arguments = "-s stop -p \"C:/Program Files/nginx\""
+
+            };
         }
 
         protected override void OnStop()
         {
-            Process.Start("C:\\Program Files\\nginx\\nginx.exe", "-s stop -p \"C:/Program Files/nginx\"");
+            if (null != _ProcessStopInfo)
+                Process.Start(_ProcessStopInfo);
         }
 
+        private ProcessStartInfo _ProcessStartInfo;
+        private ProcessStartInfo _ProcessStopInfo;
         private Process _ChildProcess;
     }
 
@@ -66,13 +83,45 @@ namespace SvcWrapper
         {
             if (sender is Installer installer)
             {
-                if (installer.Context.Parameters.ContainsKey("ServiceName"))
+                if (!Context.Parameters.ContainsKey("StartCommand"))
+                    throw new InstallException("Required argument missing: StartCommand");
+
+                StringBuilder ImagePath = new StringBuilder(Context.Parameters["AssemblyPath"]);
+
+                ImagePath.Append(" --startcmd=\"");
+                ImagePath.Append(Context.Parameters["StartCommand"]);
+                ImagePath.Append("\"");
+
+                if (Context.Parameters.ContainsKey("StartArguments"))
+                {
+                    ImagePath.Append(" --startargs=\"");
+                    ImagePath.Append(Context.Parameters["StartArguments"]);
+                    ImagePath.Append("\"");
+                }
+
+                if (Context.Parameters.ContainsKey("StopCommand"))
+                {
+                    ImagePath.Append(" --stopcmd=\"");
+                    ImagePath.Append(Context.Parameters["StopCommand"]);
+                    ImagePath.Append("\"");
+                }
+
+                if (Context.Parameters.ContainsKey("StopArguments"))
+                {
+                    ImagePath.Append(" --stopargs=\"");
+                    ImagePath.Append(Context.Parameters["StopArguments"]);
+                    ImagePath.Append("\"");
+                }
+
+                Context.Parameters["AssemblyPath"] = ImagePath.ToString();
+
+                if (Context.Parameters.ContainsKey("ServiceName"))
                     SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
 
-                if (installer.Context.Parameters.ContainsKey("DisplayName"))
+                if (Context.Parameters.ContainsKey("DisplayName"))
                     SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
 
-                if (installer.Context.Parameters.ContainsKey("Description"))
+                if (Context.Parameters.ContainsKey("Description"))
                     SvcInstaller.Description = Context.Parameters["Description"];
             }
         }
@@ -81,7 +130,7 @@ namespace SvcWrapper
         {
             if (sender is Installer installer)
             {
-                if (installer.Context.Parameters.ContainsKey("ServiceName"))
+                if (Context.Parameters.ContainsKey("ServiceName"))
                     SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
             }
         }
