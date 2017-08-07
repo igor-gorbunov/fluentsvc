@@ -15,17 +15,19 @@ For example, to install Nginx as a Windows service, run Windows command prompt a
 contents and accompanying SvcWrapper executable to "C:\Program files\nginx"):
 
 ```
-C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe /ServiceName=Nginx /DisplayName="Nginx HTTP Server" ^
-More? /Description="Nginx is a fast and lightweight HTTP/HTTPS web-server" ^
-More? /StartCommand="C:\Program Files\nginx\nginx.exe" /StartArguments="-p \"C:\Program Files\nginx\"" ^
-More? /StopCommand="C:\Program Files\nginx\nginx.exe" /StopArguments="-s stop -p \"C:\Program Files\nginx\"" ^
-More? "C:\Program Files\nginx\SvcWrapper.exe"
+C:\Windows\system32>C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe /ServiceName=Nginx ^
+More?/DisplayName="Nginx HTTP Server" ^
+More?/Description="Nginx is a fast and lightweight HTTP/HTTPS web-server" ^
+More?/StartCommand="C:\Program Files\nginx\nginx.exe" /StartArguments="-p \"C:\Program Files\nginx\"" ^
+More?/StopCommand="C:\Program Files\nginx\nginx.exe" /StopArguments="-s stop -p \"C:\Program Files\nginx\"" ^
+More?"C:\Program Files\nginx\SvcWrapper.exe"
 ```
 
 To uninstall the service type:
 
 ```
-C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe /uninstall /ServiceName=Nginx "C:\Program Files\nginx\SvcWrapper.exe"
+C:\Windows\system32>C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe ^
+More?/uninstall /ServiceName=Nginx "C:\Program Files\nginx\SvcWrapper.exe"
 ```
 
 ## SvcList
