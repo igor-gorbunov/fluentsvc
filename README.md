@@ -41,16 +41,16 @@ which is the part of .NET Redistributable. Arguments for the SvcWrapper are supp
 
 Currently supported arguments are:
 
-> ServiceName - the name of newly created service. The ServiceName cannot be null or have zero length. Its maximum size is 256 characters.
+* **ServiceName** the name of newly created service. The ServiceName cannot be null or have zero length. Its maximum size is 256 characters.
 It also cannot contain forward or backward slashes, '/' or '\', or characters from the ASCII character set with value less than decimal value 32.
-> DisplayName - the friendly name that identifies the service to the user.
-> Description - description of the service.
-> StartCommand - the path to executable to run when service is to be started. The path will be quoted before call to process start API if quotes are missing,
+* **DisplayName** the friendly name that identifies the service to the user.
+* **Description** description of the service.
+* **StartCommand** the path to executable to run when service is to be started. The path will be quoted before call to process start API if quotes are missing,
 since this a security recommendation.
-> StartArguments - the arguments to the start command. The string is passed as is.
-> StopCommand - the path to executable to run when service is to be stopped. The path will be quoted before call to process start API if quotes are missing,
+* **StartArguments** the arguments to the start command. The string is passed as is.
+* **StopCommand** the path to executable to run when service is to be stopped. The path will be quoted before call to process start API if quotes are missing,
 since this a security recommendation.
-> StopArguments - the arguments to the stop command. The string is passed as is.
+* **StopArguments** the arguments to the stop command. The string is passed as is.
 
 For example, to install Nginx as a Windows service, run Windows command prompt as an administrator and type (supposed you have put Nginx package
 contents and accompanying SvcWrapper executable to "C:\Program Files\nginx"):
