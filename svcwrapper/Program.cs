@@ -62,9 +62,6 @@ namespace SvcWrapper
         {
             SvcInstaller = new ServiceInstaller()
             {
-                Description = "Service wrapping facility for Windows OS programs.",
-                DisplayName = "Service Wrapper",
-                ServiceName = "ServiceWrapper",
                 StartType = ServiceStartMode.Automatic
             };
 
