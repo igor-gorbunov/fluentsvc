@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Configuration.Install;
 using System.Diagnostics;
 using System.ServiceProcess;
-using System.Text;
 
 namespace SvcWrapper
 {
