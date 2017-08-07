@@ -81,7 +81,7 @@ namespace SvcWrapper
 
         private void BeforeInstallEventHandler(object sender, InstallEventArgs e)
         {
-            if (sender is Installer installer)
+            if (sender is Installer)
             {
                 if (!Context.Parameters.ContainsKey("StartCommand"))
                     throw new InstallException("Required argument missing: StartCommand");
@@ -128,7 +128,7 @@ namespace SvcWrapper
 
         private void BeforeUninstallEventHandler(object sender, InstallEventArgs e)
         {
-            if (sender is Installer installer)
+            if (sender is Installer)
             {
                 if (Context.Parameters.ContainsKey("ServiceName"))
                     SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
