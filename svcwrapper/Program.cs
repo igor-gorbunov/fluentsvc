@@ -11,9 +11,20 @@ namespace SvcWrapper
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        static void Main(string[] args)
         {
-            ServiceWrapper Service = new ServiceWrapper("ServiceWrapper");
+            string servicename = null;
+
+            foreach (string s in args)
+            {
+                if (s.StartsWith("--service="))
+                    servicename = s.Remove(0, "--service=".Length);
+            }
+
+            if (null == servicename)
+                return;
+
+            ServiceWrapper Service = new ServiceWrapper(servicename);
             ServiceBase.Run(Service);
         }
     }
@@ -27,18 +38,46 @@ namespace SvcWrapper
 
         protected override void OnStart(string[] args)
         {
+
+            string ServiceKeyPath = @"SYSTEM\CurrentControlSet\Services\" + ServiceName + @"\Parameters";
+            RegistryKey RegistrySubKey = Registry.LocalMachine.OpenSubKey(ServiceKeyPath, true);
+
+            string StartCommand = null;
+            if (RegistrySubKey.GetValue("StartCommand") is string)
+            {
+                StartCommand = (string)RegistrySubKey.GetValue("StartCommand");
+                if (!StartCommand.StartsWith("\""))
+                    StartCommand = string.Format("\"{0}\"", StartCommand);
+            }
+
+            string StartArguments = null;
+            if (RegistrySubKey.GetValue("StartArguments") is string)
+                StartArguments = (string)RegistrySubKey.GetValue("StartArguments");
+
+            string StopCommand = null;
+            if (RegistrySubKey.GetValue("StopCommand") is string)
+            {
+                StopCommand = (string)RegistrySubKey.GetValue("StopCommand");
+                if (!StopCommand.StartsWith("\""))
+                    StopCommand = string.Format("\"{0}\"", StopCommand);
+            }
+
+            string StopArguments = null;
+            if (RegistrySubKey.GetValue("StopArguments") is string)
+                StopArguments = (string)RegistrySubKey.GetValue("StopArguments");
+
             _ProcessStartInfo = new ProcessStartInfo()
             {
-                FileName = "C:\\Program Files\\nginx\\nginx.exe",
-                Arguments = "-p \"C:/Program Files/nginx\""
+                FileName = StartCommand,
+                Arguments = StartArguments
             };
 
             _ChildProcess = Process.Start(_ProcessStartInfo);
 
             _ProcessStopInfo = new ProcessStartInfo()
             {
-                FileName = "C:\\Program Files\\nginx\\nginx.exe",
-                Arguments = "-s stop -p \"C:/Program Files/nginx\""
+                FileName = StopCommand,
+                Arguments = StopArguments
 
             };
         }
@@ -123,19 +162,19 @@ namespace SvcWrapper
 
                 string ServiceKeyPath = @"SYSTEM\CurrentControlSet\Services\" + SvcInstaller.ServiceName;
                 RegistryKey ServiceRegistryPath = Registry.LocalMachine.OpenSubKey(ServiceKeyPath, true);
-                RegistryKey SubKey = ServiceRegistryPath.CreateSubKey(@"Parameters");
+                RegistryKey SubKey = ServiceRegistryPath.CreateSubKey("Parameters");
 
                 if (Context.Parameters.ContainsKey("StartCommand"))
-                    SubKey.SetValue(@"StartCommand", Context.Parameters["StartCommand"]);
+                    SubKey.SetValue("StartCommand", Context.Parameters["StartCommand"]);
 
                 if (Context.Parameters.ContainsKey("StartArguments"))
-                    SubKey.SetValue(@"StartArguments", Context.Parameters["StartArguments"]);
+                    SubKey.SetValue("StartArguments", Context.Parameters["StartArguments"]);
 
                 if (Context.Parameters.ContainsKey("StopCommand"))
-                    SubKey.SetValue(@"StopCommand", Context.Parameters["StopCommand"]);
+                    SubKey.SetValue("StopCommand", Context.Parameters["StopCommand"]);
 
                 if (Context.Parameters.ContainsKey("StopArguments"))
-                    SubKey.SetValue(@"StopArguments", Context.Parameters["StopArguments"]);
+                    SubKey.SetValue("StopArguments", Context.Parameters["StopArguments"]);
             }
         }
 
