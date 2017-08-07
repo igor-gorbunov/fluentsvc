@@ -14,16 +14,16 @@ namespace SvcWrapper
         /// </summary>
         static void Main()
         {
-            ServiceWrapper Service = new ServiceWrapper();
+            ServiceWrapper Service = new ServiceWrapper("ServiceWrapper");
             ServiceBase.Run(Service);
         }
     }
 
     public partial class ServiceWrapper : ServiceBase
     {
-        public ServiceWrapper()
+        public ServiceWrapper(string servicename) : base()
         {
-            ServiceName = "ServiceWrapper";
+            ServiceName = servicename;
         }
 
         protected override void OnStart(string[] args)
