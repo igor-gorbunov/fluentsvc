@@ -97,10 +97,12 @@ namespace SvcWrapper
                 if (Context.Parameters.ContainsKey("Description"))
                     SvcInstaller.Description = Context.Parameters["Description"];
 
-                StringBuilder ImagePath = new StringBuilder(Context.Parameters["AssemblyPath"]);
-                ImagePath.Append(" --service=");
-                ImagePath.Append(Context.Parameters["ServiceName"]);
-                Context.Parameters["AssemblyPath"] = ImagePath.ToString();
+                string ImagePath;
+                if (Context.Parameters["AssemblyPath"].StartsWith("\""))
+                    ImagePath = string.Format("{0} --service={1}", Context.Parameters["AssemblyPath"], Context.Parameters["ServiceName"]);
+                else
+                    ImagePath = string.Format("\"{0}\" --service={1}", Context.Parameters["AssemblyPath"], Context.Parameters["ServiceName"]);
+                Context.Parameters["AssemblyPath"] = ImagePath;
             }
         }
 
@@ -117,6 +119,9 @@ namespace SvcWrapper
         {
             if (sender is Installer)
             {
+                if (!Context.Parameters.ContainsKey("ServiceName"))
+                    throw new InstallException("Required argument missing: ServiceName");
+
                 string ServiceKeyPath = @"SYSTEM\CurrentControlSet\Services\" + SvcInstaller.ServiceName;
                 RegistryKey ServiceRegistryPath = Registry.LocalMachine.OpenSubKey(ServiceKeyPath, true);
                 RegistryKey SubKey = ServiceRegistryPath.CreateSubKey(@"Parameters");
