@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.Diagnostics;
@@ -75,6 +76,8 @@ namespace SvcWrapper
             BeforeInstall += new InstallEventHandler(BeforeInstallEventHandler);
             BeforeUninstall += new InstallEventHandler(BeforeUninstallEventHandler);
 
+            AfterInstall += new InstallEventHandler(AfterInstallEventHandler);
+
             Installers.Add(SvcInstaller);
             Installers.Add(SvcProcessInstaller);
         }
@@ -83,46 +86,24 @@ namespace SvcWrapper
         {
             if (sender is Installer)
             {
+                if (!Context.Parameters.ContainsKey("ServiceName"))
+                    throw new InstallException("Required argument missing: ServiceName");
+
                 if (!Context.Parameters.ContainsKey("StartCommand"))
                     throw new InstallException("Required argument missing: StartCommand");
 
-                StringBuilder ImagePath = new StringBuilder(Context.Parameters["AssemblyPath"]);
-
-                ImagePath.Append(" --startcmd=\"");
-                ImagePath.Append(Context.Parameters["StartCommand"]);
-                ImagePath.Append("\"");
-
-                if (Context.Parameters.ContainsKey("StartArguments"))
-                {
-                    ImagePath.Append(" --startargs=\"");
-                    ImagePath.Append(Context.Parameters["StartArguments"]);
-                    ImagePath.Append("\"");
-                }
-
-                if (Context.Parameters.ContainsKey("StopCommand"))
-                {
-                    ImagePath.Append(" --stopcmd=\"");
-                    ImagePath.Append(Context.Parameters["StopCommand"]);
-                    ImagePath.Append("\"");
-                }
-
-                if (Context.Parameters.ContainsKey("StopArguments"))
-                {
-                    ImagePath.Append(" --stopargs=\"");
-                    ImagePath.Append(Context.Parameters["StopArguments"]);
-                    ImagePath.Append("\"");
-                }
-
-                Context.Parameters["AssemblyPath"] = ImagePath.ToString();
-
-                if (Context.Parameters.ContainsKey("ServiceName"))
-                    SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
+                SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
 
                 if (Context.Parameters.ContainsKey("DisplayName"))
                     SvcInstaller.DisplayName = Context.Parameters["DisplayName"];
 
                 if (Context.Parameters.ContainsKey("Description"))
                     SvcInstaller.Description = Context.Parameters["Description"];
+
+                StringBuilder ImagePath = new StringBuilder(Context.Parameters["AssemblyPath"]);
+                ImagePath.Append(" --service=");
+                ImagePath.Append(Context.Parameters["ServiceName"]);
+                Context.Parameters["AssemblyPath"] = ImagePath.ToString();
             }
         }
 
@@ -132,6 +113,28 @@ namespace SvcWrapper
             {
                 if (Context.Parameters.ContainsKey("ServiceName"))
                     SvcInstaller.ServiceName = Context.Parameters["ServiceName"];
+            }
+        }
+
+        private void AfterInstallEventHandler(object sender, InstallEventArgs e)
+        {
+            if (sender is Installer)
+            {
+                string ServiceKeyPath = @"SYSTEM\CurrentControlSet\Services\" + SvcInstaller.ServiceName;
+                RegistryKey ServiceRegistryPath = Registry.LocalMachine.OpenSubKey(ServiceKeyPath, true);
+                RegistryKey SubKey = ServiceRegistryPath.CreateSubKey(@"Parameters");
+
+                if (Context.Parameters.ContainsKey("StartCommand"))
+                    SubKey.SetValue(@"StartCommand", Context.Parameters["StartCommand"]);
+
+                if (Context.Parameters.ContainsKey("StartArguments"))
+                    SubKey.SetValue(@"StartArguments", Context.Parameters["StartArguments"]);
+
+                if (Context.Parameters.ContainsKey("StopCommand"))
+                    SubKey.SetValue(@"StopCommand", Context.Parameters["StopCommand"]);
+
+                if (Context.Parameters.ContainsKey("StopArguments"))
+                    SubKey.SetValue(@"StopArguments", Context.Parameters["StopArguments"]);
             }
         }
 
